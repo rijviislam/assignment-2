@@ -8,13 +8,12 @@ const app = express();
 const port = config.port;
 // parser
 app.use(express.json());
-// app.use(express.urlencoded());
 
 // initializing DB
 initDB();
 
 app.get("/", (req: Request, res: Response) => {
-  res.send("Hello World!");
+  res.send("⚡ TypeScript + Express = Magic backend in action! ✨");
 });
 
 //users CRUD
