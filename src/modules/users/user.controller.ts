@@ -14,23 +14,6 @@ const getUser = async (req: Request, res: Response) => {
   }
 };
 
-const getSingleUser = async (req: Request, res: Response) => {
-  try {
-    const result = await userServices.getSingleUser(req.params.id as string);
-    if (result.rows.length === 0) {
-      res.status(500).json({ success: false, message: "User Cant found" });
-    } else {
-      res.status(200).json({
-        success: true,
-        message: "User fetched successfully!",
-        data: result.rows[0],
-      });
-    }
-  } catch (err: any) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-};
-
 const updatedUser = async (req: Request, res: Response) => {
   const { name, email } = req.body;
 
@@ -59,6 +42,5 @@ const updatedUser = async (req: Request, res: Response) => {
 
 export const useCreateUser = {
   getUser,
-  getSingleUser,
   updatedUser,
 };

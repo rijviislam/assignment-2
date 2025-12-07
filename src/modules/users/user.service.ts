@@ -6,10 +6,6 @@ const getUser = async () => {
   );
   return result;
 };
-const getSingleUser = async (id: string) => {
-  const result = await pool.query(`SELECT * FROM users WHERE id = $1`, [id]);
-  return result;
-};
 
 const updatedUser = async (name: string, phone: string, id: string) => {
   const result = await pool.query(
@@ -23,6 +19,5 @@ const updatedUser = async (name: string, phone: string, id: string) => {
 
 export const userServices = {
   getUser,
-  getSingleUser,
   updatedUser,
 };
