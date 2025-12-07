@@ -1,4 +1,4 @@
-import { pool } from "../../../config/db";
+import { pool } from "../../config/db";
 
 const createBooking = async (payload: Record<string, unknown>) => {
   const {

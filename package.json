@@ -15,9 +15,9 @@
     "typescript": "^5.9.3"
   },
   "scripts": {
-    "dev": "npx tsx watch ./src/api/modules/server.ts",
+    "dev": "npx tsx watch ./src/modules/server.ts",
     "build": "tsc",
-    "start": "node dist/api/modules/server.js"
+    "start": "node dist/modules/server.js"
   },
   "keywords": [],
   "author": "",

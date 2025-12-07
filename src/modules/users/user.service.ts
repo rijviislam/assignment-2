@@ -1,4 +1,4 @@
-import { pool } from "../../../config/db";
+import { pool } from "../../config/db";
 
 const createUser = async (payload: Record<string, unknown>) => {
   const { name, email, password, phone, role } = payload;

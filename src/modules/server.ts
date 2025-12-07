@@ -1,6 +1,8 @@
 import express, { Request, Response } from "express";
-import config from "../../config";
-import initDB from "../../config/db";
+// import config from "../../config";
+// import initDB from "../../config/db";
+import config from "../config";
+import initDB from "../config/db";
 import { bookingsRouter } from "./bookings/booking.routes";
 import { userRouters } from "./users/user.routes";
 import { vehiclesRouters } from "./vehicles/vehicle.routes";
