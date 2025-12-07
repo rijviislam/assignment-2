@@ -30,10 +30,6 @@ const getBooking = async () => {
   const result = await pool.query(`SELECT * FROM bookings`);
   return result;
 };
-// const deleteBooking = async (id: string) => {
-//   const result = await pool.query(`DELETE FROM bookings WHERE id = $1`, [id]);
-//   return result;
-// };
 
 const updateBooking = async (
   daily_rent_price: string,
@@ -52,6 +48,5 @@ const updateBooking = async (
 export const useServiceBookings = {
   createBooking,
   getBooking,
-  // deleteBooking,
   updateBooking,
 };

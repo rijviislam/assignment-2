@@ -20,7 +20,6 @@ const signinUser = async (req: Request, res: Response) => {
 
   try {
     const result = await authServices.signinUser(req.body);
-    console.log(result.rows[0]);
     res.status(201).json({
       success: true,
       message: "Data Inserted Successfully",

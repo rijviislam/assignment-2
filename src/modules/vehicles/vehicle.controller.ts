@@ -4,7 +4,6 @@ import { useVehiclesServices } from "./vehicle.service";
 const createVehicle = async (req: Request, res: Response) => {
   try {
     const result = await useVehiclesServices.createVehicle(req.body);
-    console.log("BODY", result);
     res.status(200).json({
       success: true,
       message: "Vehicle created successfully",

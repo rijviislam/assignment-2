@@ -17,7 +17,13 @@ const updatedUser = async (name: string, phone: string, id: string) => {
   return result;
 };
 
+const deleteUser = async (id: string) => {
+  const result = pool.query(`DELETE FROM users WHERE id=$1`, [id]);
+  return result;
+};
+
 export const userServices = {
   getUser,
   updatedUser,
+  deleteUser,
 };

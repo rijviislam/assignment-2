@@ -6,8 +6,6 @@ export const pool = new Pool({
   connectionString: `${config.connection_str}`,
 });
 
-console.log(config.port, "PORT");
-
 const initDB = async () => {
   await pool.query(`
   CREATE TABLE IF NOT EXISTS users(
