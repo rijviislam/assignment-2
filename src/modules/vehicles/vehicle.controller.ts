@@ -4,7 +4,7 @@ import { useVehiclesServices } from "./vehicle.service";
 const createVehicle = async (req: Request, res: Response) => {
   try {
     const result = await useVehiclesServices.createVehicle(req.body);
-    res.status(200).json({
+    res.status(201).json({
       success: true,
       message: "Vehicle created successfully",
       data: result.rows[0],
@@ -81,7 +81,7 @@ const deleteVehicle = async (req: Request, res: Response) => {
     } else {
       res
         .status(200)
-        .json({ success: true, message: "Vehicle deleted successfully!" });
+        .json({ success: true, message: "Vehicle deleted successfully" });
     }
   } catch (err: any) {
     res.json(404).json({ success: false, message: err.message });

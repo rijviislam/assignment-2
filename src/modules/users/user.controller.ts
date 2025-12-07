@@ -6,7 +6,7 @@ const getUser = async (req: Request, res: Response) => {
     const result = await userServices.getUser();
     res.status(200).json({
       success: true,
-      message: "User Retrieve successfully",
+      message: "Users retrieved successfully",
       data: result.rows,
     });
   } catch (err: any) {
@@ -47,7 +47,7 @@ const deleteUser = async (req: Request, res: Response) => {
     } else {
       res
         .status(200)
-        .json({ success: true, message: "User deleted successfully!" });
+        .json({ success: true, message: "User deleted successfully" });
     }
   } catch (err: any) {
     res.json(404).json({ success: false, message: err.message });
