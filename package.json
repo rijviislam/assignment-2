@@ -15,7 +15,6 @@
     "typescript": "^5.9.3"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "npx tsx watch ./src/api/modules/server.ts",
     "build": "tsc",
     "start": "node dist/api/modules/server.js"

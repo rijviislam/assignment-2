@@ -17,7 +17,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 //users CRUD
-app.use("/users", userRouters);
+app.use("/api/v1", userRouters);
 app.use("/vehicles", vehiclesRouters);
 app.use("/bookings", bookingsRouter);
 
