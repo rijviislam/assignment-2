@@ -4,7 +4,7 @@ A backend service for managing vehicles, customers, bookings, and authentication
 Built with Node.js, TypeScript, Express.js, and PostgreSQL.
 
 ### 🔗 Live API URL
-https://assignment2-nu-rose.vercel.app
+https://assignment2-omega-three.vercel.app
 
 ### 🚘 Vehicle Management Features
 
