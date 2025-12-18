@@ -9,7 +9,7 @@ const loginUser = async (req: Request, res: Response) => {
     );
     res.status(201).json({
       success: true,
-      message: "User registered successfully",
+      message: "User Login successfully",
       data: result,
     });
   } catch (err: any) {
