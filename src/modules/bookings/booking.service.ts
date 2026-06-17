@@ -9,7 +9,6 @@ const db_1 = require("../../config/db");
 const createBooking = async (payload: Record<string, unknown>) => {
   const { customer_id, vehicle_id, rent_start_date, rent_end_date } = payload;
 
-  // ✅ Validate required fields
   if (!customer_id || !vehicle_id || !rent_start_date || !rent_end_date) {
     throw new Error("Missing required booking fields");
   }
@@ -19,7 +18,6 @@ const createBooking = async (payload: Record<string, unknown>) => {
   try {
     await client.query("BEGIN");
 
-    // ✅ Lock vehicle row
     const vehicleResult = await client.query(
       `SELECT * FROM vehicles WHERE id=$1 FOR UPDATE`,
       [vehicle_id],
@@ -35,7 +33,6 @@ const createBooking = async (payload: Record<string, unknown>) => {
       throw new Error("Vehicle is not available");
     }
 
-    // ✅ Safe date conversion
     const start = new Date(rent_start_date as string);
     const end = new Date(rent_end_date as string);
 
@@ -50,7 +47,6 @@ const createBooking = async (payload: Record<string, unknown>) => {
       throw new Error("rent_end_date must be after rent_start_date");
     }
 
-    // ✅ Safe price calculation
     const price = Number(vehicle.daily_rent_price);
 
     if (isNaN(price)) {
@@ -65,12 +61,10 @@ const createBooking = async (payload: Record<string, unknown>) => {
       total_price,
     });
 
-    // ❌ THIS FIXES YOUR ERROR
     if (isNaN(total_price)) {
       throw new Error("Total price calculation failed");
     }
 
-    // ✅ Insert booking
     const result = await client.query(
       `INSERT INTO bookings 
       (customer_id, vehicle_id, rent_start_date, rent_end_date, total_price, status)
@@ -86,7 +80,6 @@ const createBooking = async (payload: Record<string, unknown>) => {
       ],
     );
 
-    // ✅ Update vehicle status
     await client.query(
       `UPDATE vehicles 
        SET availability_status='booked' 
@@ -125,8 +118,6 @@ const updateBooking = async (
   status: string,
   userRole: string,
 ) => {
-  // BUG FIX 10: Missing status validation — any arbitrary string could be written
-  // to the DB (e.g. status="hacked"). Validate against allowed values first.
   const allowedStatuses = ["cancelled", "returned"];
   if (!status || !allowedStatuses.includes(status)) {
     throw new Error(
@@ -144,8 +135,6 @@ const updateBooking = async (
 
   const currentBooking = booking.rows[0];
 
-  // BUG FIX 11: Was not checking if booking is already cancelled/returned.
-  // Updating a completed booking should be rejected.
   if (currentBooking.status !== "active") {
     throw new Error(`Booking is already ${currentBooking.status}`);
   }

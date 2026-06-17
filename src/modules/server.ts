@@ -10,26 +10,21 @@ import { vehiclesRouters } from "./vehicles/vehicle.routes";
 const app = express();
 const port = config.port;
 
-// Middleware
 app.use(express.json());
 
-// DB connection
 db();
 
-// Test route
 app.get("/", (req: Request, res: Response) => {
   res.json({
     message: "⚡ TypeScript + Express = Magic backend in action! ✨",
   });
 });
 
-// Routes
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/users", userRouters);
 app.use("/api/v1/vehicles", vehiclesRouters);
 app.use("/api/v1/bookings", bookingsRouter);
 
-// Global error handler (IMPORTANT: must be last)
 app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
   const status = err.status || 500;
 
@@ -39,7 +34,6 @@ app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
   });
 });
 
-// Start server
 app.listen(port, () => {
   console.log("⚡ Server running successfully!");
 });

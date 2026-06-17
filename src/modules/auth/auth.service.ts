@@ -30,8 +30,6 @@ const loginUserIntoDB = async (email: string, password: string) => {
   );
 
   if (!isMatch) {
-    // BUG FIX 13: Original threw "Invalid Credentials!" (with exact wording).
-    // Use same generic message as user-not-found to prevent user enumeration attacks.
     throw new Error("Invalid credentials");
   }
 
@@ -57,13 +55,8 @@ const loginUserIntoDB = async (email: string, password: string) => {
 const signinUser = async (payload: Record<string, unknown>) => {
   const { name, email, password, phone, role } = payload;
 
-  // BUG FIX 14: Original allowed any caller to self-assign role="admin" during signup.
-  // New users must always be created as "customer". Only admins can elevate roles
-  // later via PUT /api/v1/users/:userId.
   const safeRole = "customer";
 
-  // BUG FIX 15: email must be stored lowercase (per schema requirement) but
-  // original code stored it as-is, so login with different casing would fail.
   const normalizedEmail = (email as string).toLowerCase();
   const hashedPass = await bcryptjs_1.hash(password as string, 10);
   const result = await db_1.pool.query(

@@ -8,9 +8,6 @@ const vehicle_service_1 = require("./vehicle.service");
 
 const createVehicle = async (req: Request, res: Response) => {
   try {
-    // BUG FIX 3: Destructure and validate required fields before calling service.
-    // Without this, missing fields silently insert NULL into the DB which
-    // violates NOT NULL constraints and causes a cryptic 500 error.
     const {
       vehicle_name,
       type,
@@ -58,8 +55,6 @@ const createVehicle = async (req: Request, res: Response) => {
       data: result.rows[0],
     });
   } catch (err: any) {
-    // BUG FIX 4: Duplicate registration_number gives a PostgreSQL unique constraint
-    // error (code 23505). Return 409 Conflict instead of 500.
     if (err.code === "23505") {
       return res.status(409).json({
         success: false,
@@ -106,9 +101,6 @@ const getSingleVehicle = async (req: Request, res: Response) => {
 
 const updateVehicle = async (req: Request, res: Response) => {
   try {
-    // BUG FIX 5: Original destructured only daily_rent_price & availability_status,
-    // so updates to vehicle_name, type, registration_number were silently ignored.
-    // Pass entire req.body so service can handle any field update.
     const result = await vehicle_service_1.useVehiclesServices.updateVehicle(
       req.body,
       req.params.id,
@@ -142,8 +134,6 @@ const deleteVehicle = async (req: Request, res: Response) => {
       .status(200)
       .json({ success: true, message: "Vehicle deleted successfully" });
   } catch (err: any) {
-    // BUG FIX 6: If vehicle has active bookings, the DB foreign key constraint fires.
-    // Return 400 Bad Request with a clear message instead of raw 500.
     if (err.code === "23503") {
       return res.status(400).json({
         success: false,

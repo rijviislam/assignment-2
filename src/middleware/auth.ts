@@ -24,9 +24,6 @@ const auth = (...roles: any) => {
 
       const token = authHeader.split(" ")[1];
 
-      // BUG FIX 1: jwt.verify throws on expired token — was crashing with 500
-      // because the original code had no try/catch around this block,
-      // now it is inside try/catch so expired tokens return 401 correctly.
       let decoded;
       try {
         decoded = jsonwebtoken_1.default.verify(
@@ -50,9 +47,6 @@ const auth = (...roles: any) => {
           .json({ success: false, message: "User not found!" });
       }
 
-      // BUG FIX 2: was setting req.user = decoded (JWT data) but the DB user
-      // may have a different/updated role than what's in the old token.
-      // Always trust the live DB role for authorization decisions.
       req.user = {
         id: user.rows[0].id,
         name: user.rows[0].name,
