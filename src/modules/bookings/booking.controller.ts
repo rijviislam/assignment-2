@@ -1,61 +1,54 @@
-import { Request, Response } from "express";
 import { useServiceBookings } from "./booking.service";
 
-const createBookings = async (req: Request, res: Response) => {
+const createBooking = async (req: any, res: any, next: any) => {
   try {
     const result = await useServiceBookings.createBooking(req.body);
+
     res.status(201).json({
       success: true,
       message: "Booking created successfully",
       data: result.rows[0],
     });
-  } catch (err: any) {
-    res.status(500).json({
-      success: false,
-      message: err.message,
-    });
+  } catch (err) {
+    next(err);
   }
 };
-const getBooking = async (req: Request, res: Response) => {
+
+const getBooking = async (req: any, res: any, next: any) => {
   try {
-    const result = await useServiceBookings.getBooking();
+    const { id, role } = req.user;
+
+    const result = await useServiceBookings.getBooking(id, role);
+
     res.status(200).json({
       success: true,
-      message: "Bookings retrieved successfully",
       data: result.rows,
     });
-  } catch (err: any) {
-    res
-      .status(500)
-      .json({ success: false, message: "Bookings can not found!" });
+  } catch (err) {
+    next(err);
   }
 };
-const updateBooking = async (req: Request, res: Response) => {
-  const { daily_rent_price, availability_status } = req.body;
+
+const updateBooking = async (req: any, res: any, next: any) => {
   try {
-    const result = await useServiceBookings.updateBooking(
-      daily_rent_price,
-      availability_status,
-      req.params.id as string
-    );
-    if (result.rows.length === 0) {
-      res.status(404).json({
-        success: false,
-        message: "Booking not found",
-      });
-    } else {
-      res.status(200).json({
-        success: true,
-        message: "Booking updated successfully",
-        data: result.rows[0],
-      });
-    }
-  } catch (err: any) {
-    res.status(500).json({ success: false, message: err.message });
+    const { id } = req.params;
+    const { status } = req.body;
+    const { role } = req.user;
+
+    const result = await useServiceBookings.updateBooking(id, status, role);
+
+    res.status(200).json({
+      success: true,
+      message: "Booking updated",
+      data: result.rows[0],
+    });
+  } catch (err) {
+    next(err);
   }
 };
-export const useCreateBookings = {
-  createBookings,
+
+export const bookingController = {
+  createBooking,
   getBooking,
   updateBooking,
 };
