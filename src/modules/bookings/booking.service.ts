@@ -1,9 +1,5 @@
 import { pool } from "../../config/db";
 
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.useServiceBookings = void 0;
-const db_1 = require("../../config/db");
-
 const createBooking = async (payload: Record<string, unknown>) => {
   const { customer_id, vehicle_id, rent_start_date, rent_end_date } = payload;
 
@@ -47,24 +43,24 @@ const createBooking = async (payload: Record<string, unknown>) => {
 
     const price = Number(vehicle.daily_rent_price);
 
-    if (isNaN(price)) {
+    if (!Number.isFinite(price)) {
       throw new Error("Invalid vehicle price in database");
     }
 
     const total_price = price * days;
 
-    console.log("DEBUG:", {
+    if (!Number.isFinite(total_price)) {
+      throw new Error("Total price calculation failed");
+    }
+
+    console.log("BOOKING DEBUG:", {
       price,
       days,
       total_price,
     });
 
-    if (isNaN(total_price)) {
-      throw new Error("Total price calculation failed");
-    }
-
     const result = await client.query(
-      `INSERT INTO bookings 
+      `INSERT INTO bookings
       (customer_id, vehicle_id, rent_start_date, rent_end_date, total_price, status)
       VALUES ($1,$2,$3,$4,$5,$6)
       RETURNING *`,
@@ -79,9 +75,7 @@ const createBooking = async (payload: Record<string, unknown>) => {
     );
 
     await client.query(
-      `UPDATE vehicles 
-       SET availability_status='booked' 
-       WHERE id=$1`,
+      `UPDATE vehicles SET availability_status='booked' WHERE id=$1`,
       [vehicle_id],
     );
 
@@ -98,17 +92,13 @@ const createBooking = async (payload: Record<string, unknown>) => {
 
 const getBooking = async (userId: string, userRole: string) => {
   if (userRole === "admin") {
-    const result = await db_1.pool.query(
-      `SELECT * FROM bookings ORDER BY id DESC`,
-    );
-    return result;
-  } else {
-    const result = await db_1.pool.query(
-      `SELECT * FROM bookings WHERE customer_id=$1 ORDER BY id DESC`,
-      [userId],
-    );
-    return result;
+    return pool.query(`SELECT * FROM bookings ORDER BY id DESC`);
   }
+
+  return pool.query(
+    `SELECT * FROM bookings WHERE customer_id=$1 ORDER BY id DESC`,
+    [userId],
+  );
 };
 
 const updateBooking = async (
@@ -117,46 +107,49 @@ const updateBooking = async (
   userRole: string,
 ) => {
   const allowedStatuses = ["cancelled", "returned"];
-  if (!status || !allowedStatuses.includes(status)) {
+
+  if (!allowedStatuses.includes(status)) {
     throw new Error(
       `Invalid status. Must be one of: ${allowedStatuses.join(", ")}`,
     );
   }
 
-  const booking = await db_1.pool.query(`SELECT * FROM bookings WHERE id=$1`, [
+  const bookingResult = await pool.query(`SELECT * FROM bookings WHERE id=$1`, [
     bookingId,
   ]);
 
-  if (booking.rows.length === 0) {
+  if (bookingResult.rows.length === 0) {
     throw new Error("Booking not found");
   }
 
-  const currentBooking = booking.rows[0];
+  const booking = bookingResult.rows[0];
 
-  if (currentBooking.status !== "active") {
-    throw new Error(`Booking is already ${currentBooking.status}`);
+  if (booking.status !== "active") {
+    throw new Error(`Booking is already ${booking.status}`);
   }
 
   if (userRole === "customer") {
     if (status !== "cancelled") {
       throw new Error("Customers can only cancel bookings");
     }
+
     const today = new Date();
-    const startDate = new Date(currentBooking.rent_start_date);
+    const startDate = new Date(booking.rent_start_date);
+
     if (today >= startDate) {
-      throw new Error("Cannot cancel booking after the rental start date");
+      throw new Error("Cannot cancel booking after start date");
     }
   }
 
-  const result = await db_1.pool.query(
+  const result = await pool.query(
     `UPDATE bookings SET status=$1 WHERE id=$2 RETURNING *`,
     [status, bookingId],
   );
 
-  if (status === "returned" || status === "cancelled") {
-    await db_1.pool.query(
+  if (status === "cancelled" || status === "returned") {
+    await pool.query(
       `UPDATE vehicles SET availability_status='available' WHERE id=$1`,
-      [currentBooking.vehicle_id],
+      [booking.vehicle_id],
     );
   }
 
