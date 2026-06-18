@@ -1,4 +1,3 @@
-"use strict";
 var __importDefault =
   (this as any).__importDefault ||
   function (mod: any) {
@@ -6,7 +5,7 @@ var __importDefault =
   };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.authServices = void 0;
-const bcryptjs_1 = __importDefault(require("bcryptjs"));
+import * as bcrypt from "bcryptjs";
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const config_1 = __importDefault(require("../../config"));
 const db_1 = require("../../config/db");
@@ -24,10 +23,7 @@ const loginUserIntoDB = async (email: string, password: string) => {
     throw new Error("Invalid credentials");
   }
 
-  const isMatch = await bcryptjs_1.default.compare(
-    password,
-    user.rows[0].password,
-  );
+  const isMatch = await bcrypt.compare(password, user.rows[0].password);
 
   if (!isMatch) {
     throw new Error("Invalid credentials");
@@ -58,7 +54,7 @@ const signinUser = async (payload: Record<string, unknown>) => {
   const safeRole = "customer";
 
   const normalizedEmail = (email as string).toLowerCase();
-  const hashedPass = await bcryptjs_1.hash(password as string, 10);
+  const hashedPass = await bcrypt.hash(password as string, 10);
   const result = await db_1.pool.query(
     `INSERT INTO users(name, email, password, phone, role) 
          VALUES($1, $2, $3, $4, $5) 

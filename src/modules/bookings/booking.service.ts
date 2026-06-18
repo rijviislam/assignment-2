@@ -1,5 +1,3 @@
-"use strict";
-
 import { pool } from "../../config/db";
 
 Object.defineProperty(exports, "__esModule", { value: true });

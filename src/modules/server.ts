@@ -35,7 +35,7 @@ app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
 });
 
 app.listen(port, () => {
-  console.log("⚡ Server running successfully!");
+  console.log("⚡ Server running successfully!", port);
 });
 
 export default app;
