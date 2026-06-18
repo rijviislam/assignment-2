@@ -1,6 +1,7 @@
-import express, { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import config from "../config";
-import initDB from "../config/db";
+import db from "../config/db";
+
 import { authRoute } from "./auth/auth.routes";
 import { bookingsRouter } from "./bookings/booking.routes";
 import { userRouters } from "./users/user.routes";
@@ -11,7 +12,7 @@ const port = config.port;
 
 app.use(express.json());
 
-initDB();
+db();
 
 app.get("/", (req: Request, res: Response) => {
   res.json({
@@ -23,7 +24,18 @@ app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/users", userRouters);
 app.use("/api/v1/vehicles", vehiclesRouters);
 app.use("/api/v1/bookings", bookingsRouter);
-app.listen(port, () => {
-  console.log("⚡ TypeScript + Express = Magic backend in action! ✨");
+
+app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
+  const status = err.status || 500;
+
+  res.status(status).json({
+    success: false,
+    message: err.message || "Internal Server Error",
+  });
 });
+
+app.listen(port, () => {
+  console.log("⚡ Server running successfully!", port);
+});
+
 export default app;

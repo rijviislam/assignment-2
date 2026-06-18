@@ -1,26 +1,49 @@
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import config from "../../config";
-import { pool } from "../../config/db";
+var __importDefault =
+  (this as any).__importDefault ||
+  function (mod: any) {
+    return mod && mod.__esModule ? mod : { default: mod };
+  };
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.authServices = void 0;
+import * as bcrypt from "bcryptjs";
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const config_1 = __importDefault(require("../../config"));
+const db_1 = require("../../config/db");
+
 const loginUserIntoDB = async (email: string, password: string) => {
-  const user = await pool.query(`SELECT * FROM users WHERE email=$1`, [email]);
-  const isMatch = await bcrypt.compare(password, user.rows[0].password);
+  if (!email || !password) {
+    throw new Error("Email and password are required");
+  }
+
+  const user = await db_1.pool.query(`SELECT * FROM users WHERE email=$1`, [
+    email.toLowerCase(),
+  ]);
+
   if (user.rows.length === 0) {
-    throw new Error("User not found");
+    throw new Error("Invalid credentials");
   }
+
+  const isMatch = await bcrypt.compare(password, user.rows[0].password);
+
   if (!isMatch) {
-    throw new Error("Invalid Credentials!");
+    throw new Error("Invalid credentials");
   }
+
   const jwtPayload = {
     id: user.rows[0].id,
     name: user.rows[0].name,
     email: user.rows[0].email,
     role: user.rows[0].role,
   };
-  // const secret = "KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30";
-  const token = jwt.sign(jwtPayload, config.jwtSecret as string, {
-    expiresIn: "1d",
-  });
+
+  const token = jsonwebtoken_1.default.sign(
+    jwtPayload,
+    config_1.default.jwtSecret,
+    {
+      expiresIn: "1d",
+    },
+  );
+
   delete user.rows[0].password;
   return { token, user: user.rows[0] };
 };
@@ -28,18 +51,21 @@ const loginUserIntoDB = async (email: string, password: string) => {
 const signinUser = async (payload: Record<string, unknown>) => {
   const { name, email, password, phone, role } = payload;
 
+  const safeRole = "customer";
+
+  const normalizedEmail = (email as string).toLowerCase();
   const hashedPass = await bcrypt.hash(password as string, 10);
-  const result = await pool.query(
+  const result = await db_1.pool.query(
     `INSERT INTO users(name, email, password, phone, role) 
-   VALUES($1, $2, $3, $4, $5) 
-   RETURNING *`,
-    [name, email, hashedPass, phone, role]
+         VALUES($1, $2, $3, $4, $5) 
+         RETURNING *`,
+    [name, normalizedEmail, hashedPass, phone, safeRole],
   );
   delete result.rows[0].password;
   return result;
 };
 
-export const authServices = {
+exports.authServices = {
   loginUserIntoDB,
   signinUser,
 };
